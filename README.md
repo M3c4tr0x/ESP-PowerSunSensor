@@ -20,11 +20,12 @@ The system is intended for photovoltaic setups that **cannot inject electricity 
   
   On the first graphe below, you can see the values of the ESP-PowerSunSensor are shown in blue, and my solar production values in yellow :
   
-<img width="1716" height="813" alt="image" src="https://github.com/user-attachments/assets/06f69332-792e-434c-a5fd-609a0f3115c7" />
+  <img width="1716" height="813" alt="Capture d'écran 2025-10-09 132655" src="https://github.com/user-attachments/assets/5e358a79-ca5a-40b6-877e-ab8b44c8d71d" />
+
 
   Below is the list of the different data reported by the sensor : 
   
-  <img width="327" height="377" alt="image" src="https://github.com/user-attachments/assets/efc613f0-a02d-4a92-91a2-544cb44a2910" />
+  <img width="395" height="329" alt="Capture d'écran 2025-10-15 134230" src="https://github.com/user-attachments/assets/6160d3f0-0a1f-484a-a99e-df59a6f3d2d6" />
 
 
 ## Use Cases
@@ -43,7 +44,7 @@ The system is intended for photovoltaic setups that **cannot inject electricity 
 
 Beta version : 
 
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/5b33ba9c-da24-4df1-9b1b-b401a1aae846" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/9f07aa3a-3c1f-4fc0-a733-3ddd7c1e7d14" />
 
 ## 💰 How Much Does It Cost?
 
@@ -71,14 +72,14 @@ This project is designed to be **as low-cost as possible**, using affordable or 
 5. After that, you can remove the USB cable
 6. Connect the miniature solar panel to the input for irradiance measurement (J3).
 7. Attach the NTC sensor firmly to the back side of one of your main solar panels and connect it on J1 connector.
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/8c12d3fb-274b-42b7-b5cd-027492b7bc9f" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/51e51614-b569-45c9-adf0-24bf7e64da0c" />
 
 8. Mount the sensor in same direction of your installation you want to monitor, example (files attached in repo) :
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/6c72d31c-fa56-4280-a832-9cd2eb5485b8" />
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/d207a021-761a-4827-b289-0dd0f50ea453" />
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/99a987ef-3bee-412e-866e-b140163b89b1" />
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/c0d7866e-ca3a-4b60-9668-864f5eb17f21" />
-<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/cadc6feb-5945-449d-9217-6a320f8a949d" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/d52ec0b3-3490-4675-9c07-b48d1d293f4d" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/af118ae3-e01c-4ce5-b522-d1985430df33" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/7f69529d-6c65-4c58-8b05-f3f8aba6fd13" />
+<img width="192" height="144" alt="image" src="https://github.com/user-attachments/assets/8f56dc22-a288-4c68-a5e0-0fa2f586b9c1" />
+
 
 9. You can separate the solar panel and NTC sensor from the electronics PCB. In my case, they are positioned 15 meters apart, and the system works fine. This tip allows for a better Wi-Fi connection by placing the electronics closer to my Wi-Fi access point.
 10. Connect the USB cable to the power supply.
