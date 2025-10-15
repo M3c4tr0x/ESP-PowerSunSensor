@@ -1,0 +1,184 @@
+esphome:
+  name: esphome-web-3d5070
+  friendly_name: ESP-PowerSunSensor
+  min_version: 2025.5.0
+  name_add_mac_suffix: false
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+
+web_server:
+  port: 80
+
+i2c:
+  sda: GPIO06
+  scl: GPIO07
+  scan: true
+  id: bus_a
+
+script:
+  - id: blink_led_update
+    mode: restart
+    then:
+      - output.turn_on: led_update
+      - delay: 200ms
+      - output.turn_off: led_update
+      
+globals:
+  - id: max_inverter_power
+    type: float
+    restore_value: no
+    initial_value: '6400.0'  
+    
+  - id: conversion_ratio
+    type: float
+    restore_value: no
+    initial_value: '0.07'  # 70mA → 1000 W/m²
+    
+  - id: pv_surface_area
+    type: float
+    restore_value: no
+    initial_value: '36.0'     # Total PV panel surface in m²
+
+  - id: pv_efficiency
+    type: float
+    restore_value: no
+    initial_value: '0.215'    # PV efficiency (21.5%)
+      
+  - id: alpha_isc
+    type: float
+    restore_value: no
+    initial_value: '0.0004'   # Temperature coefficient of current (A/A)/K
+    
+  - id: power_temp_coefficient
+    type: float
+    restore_value: no
+    initial_value: '-0.0030'  # Power temperature coefficient (-0.30 %/K)
+    
+sensor:
+  - platform: ina2xx_i2c
+    id: my_charge_sensor
+    model: INA228
+    address: 0x40
+    shunt_resistance: 0.470 ohm
+    max_current: 0.15 A
+    adc_range: 0
+    update_interval: 2s
+    current:
+      name: "INA228 Current"
+      internal: true
+      id: ina_current
+      on_value:
+        then:
+          - script.execute: blink_led_update
+
+  - platform: template
+    name: "Irradiance"
+    id: irradiance_sensor
+    unit_of_measurement: "W/m²"
+    device_class: illuminance
+    accuracy_decimals: 1
+    update_interval: 1s
+    lambda: |-
+      if (isnan(id(ina_current).state)) {
+        return NAN;
+      }
+      return (id(ina_current).state / id(conversion_ratio)) * 1000.0;
+
+  - platform: template
+    name: "Irradiance (Temperature Corrected)"
+    id: irradiance_temperature_corrected
+    unit_of_measurement: "W/m²"
+    device_class: illuminance
+    accuracy_decimals: 1
+    update_interval: 1s
+    lambda: |-
+      float G = id(ina_current).state;
+      float T = id(temperature_ntc).state;
+      if (!std::isfinite(G) || G < 0.0 || !std::isfinite(T)) return NAN;
+      // temperature correction : alpha_Isc = 0.04 %/K
+      float I_corr = G * (1.0 + id(alpha_isc) * (25.0 - T));
+      return (I_corr / id(conversion_ratio)) * 1000.0; // conversion A → W/m²
+
+  - platform: template
+    name: "Theoretical PV Power at 25°C"
+    id: theoretical_pv_power_25C
+    unit_of_measurement: "W"
+    device_class: power
+    accuracy_decimals: 1
+    update_interval: 1s
+    lambda: |-
+      if (isnan(id(irradiance_temperature_corrected).state)) {
+        return NAN;
+      }
+      // Puissance = Irradiance (W/m²) × Surface (m²) × Efficiency
+      float power = id(irradiance_temperature_corrected).state * id(pv_surface_area) * id(pv_efficiency);
+      return power;
+
+  - platform: adc
+    pin: GPIO4
+    id: ntc_source
+    attenuation: 12db
+    update_interval: 1s
+    
+  - platform: resistance
+    sensor: ntc_source
+    configuration: DOWNSTREAM
+    resistor: 12000
+    id: resistance_sensor
+
+  - platform: ntc
+    sensor: resistance_sensor
+    calibration:
+      b_constant: 3977
+      reference_temperature: 25°C
+      reference_resistance: 10000
+    name: "Temperature NTC"
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    id: temperature_ntc
+
+  - platform: template
+    name: "PV Power Calculated (Temperature Corrected)"
+    id: pv_power_calculated_temperature_corrected
+    unit_of_measurement: "W"
+    device_class: power
+    accuracy_decimals: 1
+    update_interval: 1s
+    lambda: |-
+      if (isnan(id(theoretical_pv_power_25C).state) || isnan(id(temperature_ntc).state)) {
+        return NAN;
+      }
+      // Temperature cellule in °C
+      float T = id(temperature_ntc).state;
+      // Correction Pmax (–0,30 % / K)
+      float correction = 1.0 + (T - 25.0) * id(power_temp_coefficient);
+      float power = id(theoretical_pv_power_25C).state * correction;
+      // You can clamp the maximum returned value to the maximum output power of your inverter (in my case, it's 6400W)
+      return std::min(power, id(max_inverter_power));
+
+status_led:
+  pin:
+    number: GPIO3
+    inverted: false
+
+output:
+  - platform: gpio
+    pin: GPIO10
+    id: led_update
