@@ -1,0 +1,3 @@
+# KiCad : sauvegardes automatiques et verrous
+*-backups/
+*.lck
