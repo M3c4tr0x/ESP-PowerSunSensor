@@ -1,3 +1,7 @@
 # KiCad : sauvegardes automatiques et verrous
 *-backups/
 *.lck
+
+# KiCad : fichiers locaux propres à chaque poste
+fp-info-cache
+*.kicad_prl
